@@ -65,8 +65,22 @@ ui <- fluidPage(
   selectInput(inputId = "selected_state",                  # a name for the value you choose here
               label = "Choose a state from this list!",    # the name to display on the slider
               choices = state.names),                      # your list of choices to choose from
-
+  
+  sliderInput(inputId = "selected_size",
+              label = 'Choose a number as a point size:',
+              min = 0, max = 5, value = 2),
+  
+  radioButtons(inputId = "selected_color",                  # a name for the value you choose here
+               label = "Choose a color!",    # the name to display on the slider
+               choices = c('red', 'blue', 'green')),
+               
+  textInput(inputId = 'entered_text',
+            label = 'Place your title text here',
+            value = 'Example Title'),
+  
   textOutput("state_message"), # here, we load a text object called "state_message"
+  
+  plotOutput("plot")
 
 )
 
@@ -85,6 +99,20 @@ server <- function(input, output, session) {
   output$state_message <- renderText({
     paste0("This is the state you chose: ", # this is just a string, so it will never change
            input$selected_state, "!")       # this is based on your input, selected_state defined above.
+  })
+  
+  output$plot <- renderPlot({
+    results_house %>%
+      
+      # notice we are using the selected_state variable defined above!
+      
+      filter(state == input$selected_state) %>%
+      
+      # this plot is just like normal!
+      ggplot(aes(x = primary_percent, y = general_percent)) +
+      geom_point(size = input$selected_size, color = input$selected_color) +
+      labs(title = input$entered_text) +
+      theme_bw()
   })
   
 }
